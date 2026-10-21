@@ -88,3 +88,18 @@ def scoped_to_member(member_id: str) -> Callable[[dict[str, Any]], str | None]:
         return None
 
     return _check
+
+
+def only_to_member_address(member_id: str, domain: str = "members.example") -> Callable[[dict[str, Any]], str | None]:
+    """Validator: send_email may only target the session member's own address.
+
+    In real code, resolve the address yourself and never let the model supply it.
+    """
+    expected = f"{member_id.lower()}@{domain}"
+
+    def _check(args: dict[str, Any]) -> str | None:
+        if str(args.get("to", "")).strip().lower() != expected:
+            return f"send_email may only target {member_id}'s address"
+        return None
+
+    return _check

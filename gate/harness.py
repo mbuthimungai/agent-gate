@@ -19,7 +19,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from gate import Gate, Velocity, wrap_untrusted, scoped_to_member
+from gate import Gate, Velocity, wrap_untrusted, scoped_to_member, only_to_member_address
 
 ROOT = Path(__file__).resolve().parent.parent
 PAYLOADS = ROOT / "payloads"
@@ -67,10 +67,7 @@ def build_gate() -> Gate:
         limits={"transfer_funds": 0},
         validators={
             "read_statement": scoped_to_member(SESSION_MEMBER),
-            "send_email": lambda a: (
-                None if str(a.get("to", "")).lower().endswith(f"{SESSION_MEMBER.lower()}@members.example")
-                else f"send_email may only target {SESSION_MEMBER}'s address"
-            ),
+            "send_email": only_to_member_address(SESSION_MEMBER),
         },
     )
 
